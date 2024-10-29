@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联系人管理</title>
+    <style>
+        body {
+            background-image: url("{{ url_for('static', filename='bg.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            color: #0056b3;
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            margin: 0;
+            text-align: center; /* 使所有内容居中 */
+        }
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* 给标题添加阴影效果 */
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #0056b3;
+            border-radius: 5px; /* 添加圆角 */
+            font-size: 16px;
+        }
+        button {
+            padding: 8px 12px;
+            background-color: #0056b3; /* 按钮背景颜色 */
+            border: none;
+            border-radius: 4px; /* 添加圆角 */
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s; /* 平滑过渡 */
+        }
+        button:hover {
+            background-color: #003d80; /* 悬停效果 */
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: rgba(255, 255, 255, 0.1); /* 半透明的背景 */
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px; /* 添加圆角 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); /* 添加阴影效果 */
+        }
+        .edit-form {
+            margin-top: 10px;
+            display: none; /* 默认隐藏编辑表单 */
+        }
+    </style>
+    <script>
+        // 断言图片是否加载成功
+        window.onload = function() {
+            const img = new Image();
+            img.src = "{{ url_for('static', filename='bg.jpg') }}"; // 确保路径正确
+
+            img.onload = function() {
+                console.log('背景图片加载成功');
+            };
+
+            img.onerror = function() {
+                console.error('背景图片加载失败，请检查路径或文件是否存在');
+                document.body.style.backgroundColor = '#000'; // 背景色变为黑色作为替代
+                document.body.innerHTML += '<p style="color: red;">背景图片加载失败，请检查路径或文件</p>'; // 提示信息
+            };
+        };
+
+        function toggleEditForm(contactId) {
+            const editForm = document.getElementById(`edit-form-${contactId}`);
+            editForm.style.display = editForm.style.display === 'none' ? 'flex' : 'none';
+        }
+    </script>
+</head>
+<body>
+    <h1>联系人管理</h1>
+
+    <form method="POST" action="/contacts">
+        <input type="text" name="name" placeholder="姓名" required>
+        <input type="text" name="phone" placeholder="电话" required>
+        <input type="text" name="location" placeholder="位置" required>
+        <button type="submit">添加联系人</button>
+    </form>
+
+    <ul>
+        {% for contact in contacts %}
+            <li>
+                {{ contact[1] }} - {{ contact[2] }} (位置: {{ contact[3] }})
+                <div>
+                    <button onclick="toggleEditForm({{ contact[0] }})">修改</button>
+                    <form method="POST" action="{{ url_for('remove_contact', contact_id=contact[0]) }}" style="display:inline;">
+                        <button type="submit">删除</button>
+                    </form>
+                </div>
+            </li>
+            <li id="edit-form-{{ contact[0] }}" class="edit-form" style="display:none;">
+                <form method="POST" action="{{ url_for('edit_contact', contact_id=contact[0]) }}" style="display:flex;">
+                    <input type="text" name="name" value="{{ contact[1] }}" required>
+                    <input type="text" name="phone" value="{{ contact[2] }}" required>
+                    <input type="text" name="location" value="{{ contact[3] }}" required>
+                    <button type="submit">更新</button>
+                    <button type="button" onclick="toggleEditForm({{ contact[0] }})">取消</button> <!-- 取消按钮 -->
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
